@@ -1,6 +1,6 @@
-# Added files in Phase 2
+# Source and deliverable files — 0.3.0
 
-Paths are relative to the extracted `zenplex/` root.
+All paths are relative to the extracted `zenplex/` folder.
 
 - `.gitignore`
 - `.prettierignore`
@@ -9,6 +9,10 @@ Paths are relative to the extracted `zenplex/` root.
 - `README.md`
 - `THIRD_PARTY_NOTICES.md`
 - `apps/desktop/main.ts`
+- `apps/desktop/native/channel.ts`
+- `apps/desktop/native/files.ts`
+- `apps/desktop/native/network.ts`
+- `apps/desktop/native/service.ts`
 - `apps/desktop/preload.cts`
 - `apps/web/index.html`
 - `apps/web/public/zenplex.svg`
@@ -16,12 +20,17 @@ Paths are relative to the extracted `zenplex/` root.
 - `apps/web/src/components/AboutPage.tsx`
 - `apps/web/src/components/DiagnosticsPage.tsx`
 - `apps/web/src/components/HomePage.tsx`
+- `apps/web/src/components/NativeControls.tsx`
 - `apps/web/src/components/QueuePanel.tsx`
+- `apps/web/src/components/RangeControl.tsx`
 - `apps/web/src/components/SettingsPanel.tsx`
 - `apps/web/src/components/Transport.tsx`
 - `apps/web/src/components/UrlDialog.tsx`
+- `apps/web/src/desktop.d.ts`
 - `apps/web/src/main.tsx`
 - `apps/web/src/player/html-adapter.ts`
+- `apps/web/src/player/native-adapter.ts`
+- `apps/web/src/player/use-native-viewport.ts`
 - `apps/web/src/state/settings.ts`
 - `apps/web/src/styles.css`
 - `assets/zenplex.ico`
@@ -32,23 +41,46 @@ Paths are relative to the extracted `zenplex/` root.
 - `docs/BUILDING.md`
 - `docs/FEATURES.md`
 - `docs/FILES.md`
+- `docs/PHASE3_ARCHITECTURE.md`
 - `docs/SECURITY.md`
 - `docs/VALIDATION.md`
+- `docs/WINDOWS_NATIVE.md`
 - `eslint.config.js`
+- `native/player-host/BUILD-MANIFEST.json`
+- `native/player-host/CMakeLists.txt`
+- `native/player-host/input.conf`
+- `native/player-host/main.cpp`
+- `native/player-host/out/input.conf`
+- `native/player-host/out/zenplex-player-host.exe`
+- `native/player-host/vendor/JSON-LICENSE.MIT`
+- `native/player-host/vendor/json.hpp`
+- `native/player-host/vendor/mpv/client.h`
 - `package-lock.json`
 - `package.json`
 - `packages/core/media.ts`
+- `packages/native/protocol.ts`
 - `packages/settings/index.ts`
 - `playwright.config.ts`
+- `scripts/build-native.ps1`
+- `scripts/install-native.mjs`
+- `scripts/native-doctor.mjs`
 - `tests/adapter.test.ts`
 - `tests/e2e/foundation.spec.ts`
+- `tests/e2e/native-ui.spec.ts`
+- `tests/fixtures/native-multitrack.mkv`
+- `tests/fixtures/native-subtitle.srt`
 - `tests/fixtures/sample.webm`
 - `tests/media.test.ts`
+- `tests/native-adapter.test.ts`
+- `tests/native-channel.test.ts`
+- `tests/native-policy.test.ts`
+- `tests/native-service.test.ts`
 - `tests/settings-ui.test.tsx`
 - `tests/settings.test.ts`
 - `tests/setup.ts`
+- `tests/windows/native-smoke.mjs`
 - `tsconfig.desktop.json`
 - `tsconfig.json`
 - `vite.config.ts`
 
-Generated outputs: `dist/` (web renderer) and `dist-desktop/` (compiled Electron code).
+Generated outputs included: `dist/`, `dist-desktop/`, and `native/player-host/out/zenplex-player-host.exe`. The helper is cross-compiled but not run on Windows. No libmpv DLL is bundled.

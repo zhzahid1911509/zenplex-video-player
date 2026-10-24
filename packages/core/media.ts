@@ -1,6 +1,12 @@
 export type PlaybackStatus =
   'idle' | 'loading' | 'ready' | 'playing' | 'paused' | 'buffering' | 'ended' | 'error';
-export type MediaSource = { id: string; title: string; url: string; kind: 'file' | 'url' };
+export type MediaSource = {
+  id: string;
+  title: string;
+  url: string;
+  kind: 'file' | 'url';
+  nativeToken?: string;
+};
 export type PlaybackState = {
   status: PlaybackStatus;
   position: number;
@@ -12,6 +18,19 @@ export type PlaybackState = {
   error: string | null;
   width: number;
   height: number;
+  tracks?: {
+    id: number;
+    type: 'audio' | 'sub';
+    title: string;
+    lang: string;
+    codec: string;
+    selected: boolean;
+  }[];
+  videoCodec?: string;
+  audioCodec?: string;
+  engineVersion?: string;
+  audioDelay?: number;
+  subtitleDelay?: number;
 };
 export type PlaybackCapabilities = {
   engine: string;
@@ -25,6 +44,7 @@ export type PlaybackCapabilities = {
 export interface PlaybackAdapter {
   readonly capabilities: PlaybackCapabilities;
   openMedia(source: MediaSource): void;
+  closeMedia(): void;
   play(): Promise<void>;
   pause(): void;
   stop(): void;

@@ -1,0 +1,37 @@
+{
+  "build": "Cross-compiled on Linux; Windows runtime not tested",
+  "compiler": "Zig 0.17.0",
+  "target": "x86_64-windows-gnu",
+  "libmpvHeader": "v0.41.0",
+  "jsonHeader": "v3.12.0",
+  "files": [
+    {
+      "path": "main.cpp",
+      "sha256": "354e2e7bb0591ab0736cbdb7c6da0eb3c59afd20c2af43b28a617b8e74587fb5"
+    },
+    {
+      "path": "input.conf",
+      "sha256": "322e258878c8f8340a2530ebb18922e4310beb5de175b4b1e2cfca531c066a8e"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "c74fd6e4ac848c74f8f55dc27f7c30bcda0078faee8f9697f3cb116b91875fa0"
+    },
+    {
+      "path": "vendor/mpv/client.h",
+      "sha256": "3c073236a09cb456c6e80587d5523c8771c32fb22ca014e0f99cc3d43905b75c"
+    },
+    {
+      "path": "vendor/json.hpp",
+      "sha256": "aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63"
+    },
+    {
+      "path": "vendor/JSON-LICENSE.MIT",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "out/zenplex-player-host.exe",
+      "sha256": "258d6000e79afbcc561df0348307fe624fb905b93b96d099ad1ba83bf769447c"
+    }
+  ]
+}

@@ -19,7 +19,11 @@ import {
   initialPlayback,
   type MediaSource,
   type PlaybackState,
+  type PlaybackAdapter,
 } from '../../../packages/core/media';
+import { NativePlaybackAdapter } from './player/native-adapter';
+import { useNativeViewport } from './player/use-native-viewport';
+import { NativeControls } from './components/NativeControls';
 import { HtmlMediaAdapter } from './player/html-adapter';
 import { useSettings } from './state/settings';
 import { QueuePanel } from './components/QueuePanel';
@@ -42,7 +46,12 @@ export function App() {
   const [queue, setQueue] = useState<MediaSource[]>([]);
   const [active, setActive] = useState<MediaSource | null>(null);
   const [state, setState] = useState<PlaybackState>({ ...initialPlayback });
-  const [adapter, setAdapter] = useState<HtmlMediaAdapter | null>(null);
+  const [adapter, setAdapter] = useState<PlaybackAdapter | null>(null);
+  const [nativeFullscreen, setNativeFullscreen] = useState(false);
+  const [nativeDialog, setNativeDialog] = useState(false);
+  const [runtimeNotice, setRuntimeNotice] = useState('');
+  const viewport = useRef<HTMLDivElement>(null);
+  const shortcutHandler = useRef<(key: string) => void>(() => {});
   const [urlOpen, setUrlOpen] = useState(false);
   const [notice, setNotice] = useState('');
   const [search, setSearch] = useState('');
@@ -52,19 +61,50 @@ export function App() {
   const objectUrls = useRef(new Set<string>());
   const { settings, update, warning } = useSettings();
   useEffect(() => {
-    const element = video.current;
-    if (!element) return;
-    const engine = new HtmlMediaAdapter(element);
-    const unsubscribe = engine.subscribe(setState);
-    setAdapter(engine);
+    let disposed = false;
+    let engine: PlaybackAdapter | undefined;
+    let unsubscribe: (() => void) | undefined;
     const urls = objectUrls.current;
+    async function initialize() {
+      if (!video.current) return;
+      if (window.zenplex) {
+        try {
+          const runtime = await window.zenplex.runtime();
+          if (disposed) return;
+          if (runtime.nativeAvailable)
+            engine = new NativePlaybackAdapter(window.zenplex, (key) =>
+              shortcutHandler.current(key),
+            );
+          else setRuntimeNotice(runtime.reason);
+        } catch {
+          if (!disposed)
+            setRuntimeNotice('Desktop bridge unavailable. Browser playback is active.');
+        }
+      }
+      if (disposed || !video.current) return;
+      engine ??= new HtmlMediaAdapter(video.current);
+      unsubscribe = engine.subscribe(setState);
+      setAdapter(engine);
+    }
+    void initialize();
     return () => {
-      unsubscribe();
-      engine.dispose();
+      disposed = true;
+      unsubscribe?.();
+      engine?.dispose();
       urls.forEach((url) => URL.revokeObjectURL(url));
       urls.clear();
     };
   }, []);
+  useNativeViewport(
+    adapter,
+    viewport,
+    page === 'player' && !!active && !urlOpen && !nativeDialog && state.status !== 'error',
+  );
+  useEffect(() => window.zenplex?.onFullscreen(setNativeFullscreen), []);
+  useEffect(() => {
+    if (adapter instanceof NativePlaybackAdapter)
+      void adapter.command({ op: 'fit', value: settings.fit });
+  }, [adapter, settings.fit]);
   useEffect(() => {
     const query = window.matchMedia('(prefers-color-scheme: light)');
     const apply = () => {
@@ -97,15 +137,34 @@ export function App() {
   }, [adapter, active]);
   const fullscreen = useCallback(async () => {
     try {
+      if (adapter instanceof NativePlaybackAdapter && window.zenplex) {
+        await window.zenplex.fullscreen(!nativeFullscreen);
+        return;
+      }
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (stage.current?.requestFullscreen) await stage.current.requestFullscreen();
       else setNotice('Fullscreen is unavailable in this browser.');
     } catch {
       setNotice('Fullscreen was blocked. Try the fullscreen button after selecting media.');
     }
-  }, []);
+  }, [adapter, nativeFullscreen]);
+  useEffect(() => {
+    shortcutHandler.current = (key) => {
+      if (key === 'fullscreen') void fullscreen();
+      else if (key === 'escape' && nativeFullscreen) void window.zenplex?.fullscreen(false);
+      else if (key === 'toggle') toggle();
+      else if (key === 'back') adapter?.seek(adapter.getPlaybackState().position - 5);
+      else if (key === 'forward') adapter?.seek(adapter.getPlaybackState().position + 5);
+      else if (key === 'mute') adapter?.setMuted(!adapter.getPlaybackState().muted);
+    };
+  }, [adapter, fullscreen, toggle, nativeFullscreen]);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (event.code === 'Escape' && nativeFullscreen && !urlOpen) {
+        event.preventDefault();
+        void window.zenplex?.fullscreen(false);
+        return;
+      }
       const target = event.target as HTMLElement;
       if (
         urlOpen ||
@@ -117,12 +176,17 @@ export function App() {
         return;
       if (event.code === 'KeyO') {
         event.preventDefault();
-        fileInput.current?.click();
+        if (adapter instanceof NativePlaybackAdapter)
+          document.getElementById('open-files')?.click();
+        else fileInput.current?.click();
         return;
       }
       if (page !== 'player' || !active || !adapter) return;
       const current = adapter.getPlaybackState();
       switch (event.code) {
+        case 'Escape':
+          if (nativeFullscreen) void window.zenplex?.fullscreen(false);
+          break;
         case 'Space':
           event.preventDefault();
           toggle();
@@ -155,13 +219,48 @@ export function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [page, active, adapter, toggle, fullscreen, update, urlOpen]);
+  }, [page, active, adapter, toggle, fullscreen, update, urlOpen, nativeFullscreen]);
   const select = (item: MediaSource) => {
     setActive(item);
     setPage('player');
     setNotice('');
   };
+  async function chooseFiles() {
+    if (!(adapter instanceof NativePlaybackAdapter) || !window.zenplex) {
+      fileInput.current?.click();
+      return;
+    }
+    setNativeDialog(true);
+    try {
+      const files = await window.zenplex.pickFiles();
+      const remaining = Math.max(0, 200 - queue.length);
+      const added = files.slice(0, remaining).map((file) => ({
+        id: crypto.randomUUID(),
+        title: file.title,
+        url: '',
+        kind: 'file' as const,
+        nativeToken: file.token,
+      }));
+      for (const file of files.slice(remaining)) await window.zenplex.releaseFile(file.token);
+      if (added.length) {
+        setQueue((current) => [...current, ...added]);
+        select(added[0]!);
+      }
+    } catch {
+      setNotice(
+        'Could not open native files. Choose local media files and check the 200-item queue limit.',
+      );
+    } finally {
+      setNativeDialog(false);
+    }
+  }
   function openFiles(files: FileList | File[]) {
+    if (adapter instanceof NativePlaybackAdapter) {
+      setNotice(
+        'Use Open files for native playback so ZenPlex can grant access through the Windows file picker.',
+      );
+      return;
+    }
     const candidates = Array.from(files);
     const remaining = Math.max(0, 200 - queue.length);
     const added: MediaSource[] = [];
@@ -198,7 +297,13 @@ export function App() {
       adapter?.closeMedia();
       setActive(null);
     }
-    if (item.kind === 'file') {
+    if (item.nativeToken)
+      void window.zenplex
+        ?.releaseFile(item.nativeToken)
+        .catch(() =>
+          setNotice('File access could not be released. Restart ZenPlex to clear grants.'),
+        );
+    if (item.kind === 'file' && !item.nativeToken) {
       URL.revokeObjectURL(item.url);
       objectUrls.current.delete(item.url);
     }
@@ -230,7 +335,7 @@ export function App() {
   );
   return (
     <div
-      className="app"
+      className={`app ${nativeFullscreen ? 'native-fullscreen' : ''}`}
       onDragOver={(event) => {
         if (event.dataTransfer.types.includes('Files')) event.preventDefault();
       }}
@@ -280,7 +385,7 @@ export function App() {
               <p>Your files stay on your device.</p>
             </div>
           </div>
-          <span className="version">v0.2.0 · Foundation</span>
+          <span className="version">v0.3.0 · Native preview</span>
         </div>
       </aside>
       <div className="content">
@@ -295,7 +400,7 @@ export function App() {
               <Link size={16} />
               <span>Open URL</span>
             </button>
-            <button className="primary" onClick={() => fileInput.current?.click()}>
+            <button id="open-files" className="primary" onClick={() => void chooseFiles()}>
               <FolderOpen size={17} />
               <span>Open files</span>
             </button>
@@ -313,6 +418,11 @@ export function App() {
           }}
         />
         <main id="main" tabIndex={-1}>
+          {runtimeNotice && (
+            <p className="notice" role="status">
+              {runtimeNotice}
+            </p>
+          )}
           {(warning || notice) && (
             <div className="notice" role="status">
               {warning || notice}
@@ -321,7 +431,7 @@ export function App() {
           )}
           {page === 'home' && (
             <HomePage
-              onFiles={() => fileInput.current?.click()}
+              onFiles={() => void chooseFiles()}
               onUrl={() => setUrlOpen(true)}
               onSettings={() => setPage('settings')}
               onQueue={() => setPage('queue')}
@@ -335,7 +445,7 @@ export function App() {
                 <h1>{active?.title ?? 'Ready when you are.'}</h1>
                 <p className="muted">
                   {active
-                    ? `${active.kind === 'file' ? 'Local media' : 'HTTPS source'} · HTML media engine`
+                    ? `${active.kind === 'file' ? 'Local media' : 'HTTPS source'} · ${adapter?.capabilities.engine ?? 'Initializing'} engine`
                     : 'Open a file to begin. Playback reflects actual media events.'}
                 </p>
               </div>
@@ -344,12 +454,14 @@ export function App() {
             <div className="player-frame" ref={stage}>
               <div
                 className="video-stage"
+                ref={viewport}
                 onDoubleClick={() => {
                   if (active) void fullscreen();
                 }}
               >
                 <video
                   ref={video}
+                  hidden={adapter instanceof NativePlaybackAdapter}
                   playsInline
                   style={{ objectFit: settings.fit }}
                   aria-label="Media playback"
@@ -358,7 +470,7 @@ export function App() {
                   <div className="video-empty">
                     <img src="./zenplex.svg" alt="" />
                     <h2>Space for your next story.</h2>
-                    <button onClick={() => fileInput.current?.click()}>
+                    <button onClick={() => void chooseFiles()}>
                       <FolderOpen size={18} />
                       Open media
                     </button>
@@ -410,6 +522,9 @@ export function App() {
                 }}
               />
             </div>
+            {adapter instanceof NativePlaybackAdapter && active && (
+              <NativeControls engine={adapter} state={state} onDialog={setNativeDialog} />
+            )}
             <p className="shortcuts">
               <kbd>Space</kbd> Play / pause <kbd>← →</kbd> Seek 5s <kbd>M</kbd> Mute <kbd>F</kbd>{' '}
               Fullscreen <kbd>O</kbd> Open
@@ -464,7 +579,12 @@ export function App() {
               </Suspense>
             </>
           )}
-          {page === 'diagnostics' && <DiagnosticsPage state={state} />}
+          {page === 'diagnostics' && (
+            <DiagnosticsPage
+              state={state}
+              engine={adapter?.capabilities.engine ?? 'Initializing'}
+            />
+          )}
           {page === 'about' && <AboutPage />}
         </main>
         <footer>

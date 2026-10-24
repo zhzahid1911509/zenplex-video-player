@@ -1,0 +1,7 @@
+1
+00:00:00,300 --> 00:00:03,000
+ZenPlex native subtitle verification
+
+2
+00:00:03,000 --> 00:00:05,800
+বাংলা • Unicode subtitle test

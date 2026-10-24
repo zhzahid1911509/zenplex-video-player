@@ -1,26 +1,23 @@
-# Feature completion matrix
+# Feature completion — 0.3.0
 
-| Feature                                                          | Status in 0.2.0                            | Evidence / limitation                                         |
-| ---------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------- |
-| React/TypeScript app shell                                       | Implemented                                | Vite production build and typecheck                           |
-| Home/player/queue/settings/diagnostics/about navigation          | Implemented                                | Browser E2E suite                                             |
-| Original branding and responsive themes                          | Implemented                                | SVG/PNG/ICO; dark/light/system, violet/teal                   |
-| Settings persistence, validation, migration, import/export/reset | Implemented                                | Unit/UI tests and E2E persistence                             |
-| Local compatible media                                           | Implemented browser path                   | HTML media; test corpus is a small WebM fixture               |
-| Direct HTTPS media                                               | Implemented, limited                       | HTML media; no guarantee of remote availability/codec support |
-| Play/pause/stop/seek/volume/mute/speed/fullscreen                | Implemented browser path                   | Adapter tests and selected real browser checks                |
-| Keyboard controls                                                | Implemented                                | Space, arrows, M, F, O; ignores form controls and modal       |
-| Session queue add/remove/reorder/search/previous/next            | Implemented                                | No persistence or automatic next/repeat/shuffle               |
-| Engine abstraction and cleanup                                   | Implemented foundation                     | Native adapter not present                                    |
-| Electron secure shell                                            | Implemented, platform verification pending | Compiled main/preload; Windows runtime not tested             |
-| Windows installer configuration                                  | Prepared, unverified                       | No installer generated                                        |
-| mpv/libVLC native rendering                                      | Planned Phase 3                            | Native integration gate in ARCHITECTURE.md                    |
-| Audio/subtitle tracks, synchronization                           | Planned Phase 3+                           | No inactive imitation controls                                |
-| M3U/HLS/DASH                                                     | Planned Phase 4                            | Manifest candidates explicitly rejected                       |
-| Network recovery                                                 | Planned Phase 4                            | Manual retry only                                             |
-| AI transcription/translation                                     | Planned Phase 5                            | No provider/API code or credentials                           |
-| Media library/history/resume                                     | Planned Phase 6                            | Session queue only                                            |
-| Mobile native apps                                               | Planned Phase 7                            | Responsive browser UI is not an Android/iOS app               |
-| Production signing and distribution                              | Planned Phase 9                            | Release gates pending                                         |
+| Capability                                               | Implementation                       | Verification                                                   |
+| -------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------- |
+| Phase 2 navigation/themes/settings/browser player        | Preserved                            | Unit/UI/browser tests                                          |
+| Typed native playback adapter                            | Implemented                          | Unit and bridge-contract tests                                 |
+| Windows embedded libmpv helper                           | Implemented; x64 executable included | Cross-compiled; Windows runtime pending                        |
+| Native file picker and opaque file grants                | Implemented                          | File-grant tests; Windows dialog pending                       |
+| Native direct HTTPS playback path                        | Implemented with restricted input    | URL policy/bridge tests; live native URL pending               |
+| Native play/pause/stop/seek/volume/mute/speed            | Implemented                          | Command tests; Windows playback pending                        |
+| Native audio/subtitle selection                          | Implemented                          | UI/contract tests; actual switching pending                    |
+| External SRT/VTT/ASS/SSA subtitle loading                | Implemented                          | Input validation; rendering pending                            |
+| Audio/subtitle delay, frame step, fit/fill/stretch       | Implemented                          | Command validation; Windows media behavior pending             |
+| Native fullscreen, DPI geometry, shortcuts               | Implemented                          | UI geometry/fullscreen contract; Windows visual checks pending |
+| Cleanup, deadlines, bounded transport, session isolation | Implemented                          | Automated transport/lifecycle tests                            |
+| Native setup/doctor/Windows test harness                 | Implemented                          | Doctor correctly detects missing DLL; Windows test not run     |
+| Windows NSIS installer                                   | Configuration updated                | No installer generated                                         |
+| M3U/HLS/DASH and automatic network recovery              | Planned Phase 4                      | Not implemented                                                |
+| AI Subtitle Studio                                       | Planned Phase 5                      | Not implemented                                                |
+| Advanced library and per-file persistence                | Planned Phase 6                      | Session queue only                                             |
+| Android/iOS native applications                          | Planned Phase 7                      | Not implemented                                                |
 
-The production milestone in the supplied specification remains unmet. This is a tested foundation release, not a claim of native codec coverage or production readiness.
+Phase 3's source implementation is delivered as a preview. The phase's Windows acceptance gate remains open. Do not label the native release production-ready before executing the supplied test and manual matrix.

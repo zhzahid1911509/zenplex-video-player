@@ -1,9 +1,9 @@
 {
   "name": "zenplex",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "ZenPlex multimedia player — Phase 2 foundation",
+  "description": "ZenPlex Phase 3 Windows native playback preview",
   "main": "dist-desktop/apps/desktop/main.js",
   "engines": {
     "node": ">=22.12.0"
@@ -19,9 +19,13 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check": "npm run lint && npm run test && npm run build",
-    "package:win": "npm run build && electron-builder --win nsis --x64",
+    "package:win": "npm run native:doctor && npm run build && electron-builder --win nsis --x64",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "native:doctor": "node scripts/native-doctor.mjs",
+    "native:install": "node scripts/install-native.mjs",
+    "native:build": "powershell -NoProfile -File scripts/build-native.ps1",
+    "test:native": "npm run build && electron tests/windows/native-smoke.mjs"
   },
   "build": {
     "appId": "app.zenplex.player",
@@ -43,7 +47,23 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
-    }
+    },
+    "extraResources": [
+      {
+        "from": "native/player-host/out",
+        "to": "native",
+        "filter": [
+          "*.exe",
+          "*.dll",
+          "input.conf",
+          "runtime-manifest.json"
+        ]
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.md"
+      }
+    ]
   },
   "dependencies": {
     "lucide-react": "1.61.0",

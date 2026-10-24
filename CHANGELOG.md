@@ -10,3 +10,12 @@
 - Added deterministic media fixture, 41 unit/component tests and six browser tests.
 - Added architecture, security, feature status, packaging and validation documentation.
 - Native Windows engine, streaming playlists, subtitles, AI and mobile builds remain scheduled phases.
+
+## 0.3.0 — Phase 3 native playback preview
+
+- Added a Windows x64 child-window helper that dynamically loads libmpv, plus the helper's complete C++/CMake source and pinned dependency headers.
+- Added validated desktop commands, native file picker grants, bounded private pipe transport, source/session isolation, startup timeouts and helper cleanup.
+- Added native track selection, external subtitles, audio/subtitle delay, frame stepping, native fullscreen and geometry updates.
+- Added runtime installation/doctor/build scripts, multitrack test media and a real Windows integration harness.
+- Preserved and regression-tested the browser player.
+- Windows runtime/rendering, live native URLs, native codec coverage and installer verification remain pending. No libmpv DLL is bundled.

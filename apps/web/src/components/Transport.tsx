@@ -1,3 +1,5 @@
+import { RangeControl } from './RangeControl';
+import { useEffect, useState } from 'react';
 import {
   Play,
   Pause,
@@ -38,11 +40,13 @@ export function Transport({
   hasPrevious: boolean;
   hasNext: boolean;
 }) {
+  const [rate, setRate] = useState(state.rate);
+  useEffect(() => setRate(state.rate), [state.rate]);
   return (
     <div className="transport">
       <div className="timeline">
         <span>{timeLabel(state.position)}</span>
-        <input
+        <RangeControl
           aria-label="Seek"
           type="range"
           min="0"
@@ -50,7 +54,7 @@ export function Transport({
           step="0.1"
           value={Math.min(state.position, state.duration || 1)}
           disabled={!enabled || !state.duration}
-          onChange={(e) => onSeek(Number(e.target.value))}
+          onValue={onSeek}
         />
         <span>{timeLabel(state.duration)}</span>
       </div>
@@ -82,7 +86,7 @@ export function Transport({
           <button className="icon" aria-label={state.muted ? 'Unmute' : 'Mute'} onClick={onMute}>
             {state.muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
-          <input
+          <RangeControl
             className="volume"
             aria-label="Volume"
             type="range"
@@ -90,14 +94,18 @@ export function Transport({
             max="1"
             step="0.01"
             value={state.muted ? 0 : state.volume}
-            onChange={(e) => onVolume(Number(e.target.value))}
+            onValue={onVolume}
           />
         </div>
         <div className="row">
           <select
             aria-label="Playback speed"
-            value={state.rate}
-            onChange={(e) => onRate(Number(e.target.value))}
+            value={rate}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              setRate(value);
+              onRate(value);
+            }}
           >
             {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3].map((rate) => (
               <option key={rate} value={rate}>

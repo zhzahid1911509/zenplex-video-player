@@ -6,3 +6,7 @@ test-results/
 playwright-report/
 .env
 *.log
+
+native/player-host/build/
+native/player-host/out/*.dll
+native/player-host/out/runtime-manifest.json

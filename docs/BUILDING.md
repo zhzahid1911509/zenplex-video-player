@@ -1,56 +1,49 @@
-# Build and packaging
+# Building ZenPlex 0.3.0
 
-## Requirements
-
-Use Node.js 24 LTS and npm. The package engine permits Node >=22.12; this environment used Node 24.19.0. Dependencies are pinned in package.json and package-lock.json. Package downloads require registry access. Electron's postinstall additionally downloads its platform runtime.
-
-## Windows PowerShell
+Use Node.js 24 LTS and npm. Dependencies are pinned in package-lock.json.
 
 ```powershell
-cd .\zenplex
 npm ci
 npm run check
-npm run desktop
-```
-
-`npm run desktop` builds both renderer and main/preload code, then opens Electron. It uses the HTML media adapter in 0.2.0, not mpv. If the Electron runtime was deliberately skipped during installation, restore it with `node node_modules/electron/install.js` before launching.
-
-For a shell installer, on Windows:
-
-```powershell
-npm run package:win
-```
-
-Output is configured under `release/`. This command is provided but has not been verified on Windows here. It does not bundle mpv or FFmpeg. It will be an unsigned foundation installer unless appropriate signing is configured. Native engine packaging, file associations and command-line open-with handling arrive in later phases.
-
-## Browser development
-
-```powershell
 npm run dev
 ```
 
-Open http://127.0.0.1:5173. For a production build and local preview:
+`npm run build` compiles the web renderer into `dist/` and desktop/main/shared protocol code into `dist-desktop/`. `npm run preview` serves the production browser build. Do not open the browser build by double-clicking index.html.
+
+## Desktop/native
+
+Follow [WINDOWS_NATIVE.md](WINDOWS_NATIVE.md) to install the libmpv DLL. The source ZIP includes the cross-compiled x64 helper, not libmpv.
 
 ```powershell
-npm run build
-npm run preview
+npm run native:install -- "C:\Tools\libmpv"
+npm run native:doctor
+npm run desktop
+npm run test:native
 ```
 
-Use an HTTP server for the browser build; do not double-click dist/index.html. Electron loads its packaged file itself. The app does not need environment variables or API keys in this phase.
+The Electron postinstall downloads its runtime during `npm ci`. If binary download was deliberately skipped, run `node node_modules/electron/install.js` before desktop launch.
 
-## Tests
+To rebuild the helper, install Visual Studio Build Tools with C++ and CMake and run `npm run native:build` in Developer PowerShell. CMake uses the checked-in header dependencies. The provided helper was built on Linux using Zig 0.17.0:
+
+```bash
+zig c++ -target x86_64-windows-gnu -std=c++17 -O2 native/player-host/main.cpp -luser32 -lgdi32 -o native/player-host/out/zenplex-player-host.exe
+```
+
+The helper uses Windows APIs and the OS Universal CRT. Its actual startup must be tested on the target Windows machine.
+
+## Browser tests
 
 ```powershell
-npm test
 npx playwright install chromium
 npm run test:e2e
-npm audit
 ```
 
-The E2E suite uses `tests/fixtures/sample.webm`, generated from FFmpeg's synthetic test pattern and sine wave. It tests actual decoding/progress, not a fake player timer. The unit media-element tests intentionally mock the browser's native methods to exercise adapter lifecycle/error logic independently.
+On a restricted test host, `ZENPLEX_TEST_CHROMIUM` can identify an existing Chromium executable. One E2E test uses a simulated desktop bridge to verify UI command routing; it is not a native engine test. The other playback tests decode actual synthetic WebM bytes.
 
-On a restricted test host only, `ZENPLEX_TEST_CHROMIUM` may specify an existing Chromium executable. This is not required for ordinary installations.
+## Distribution
+
+`npm run package:win` first checks required native files, then builds the app and invokes electron-builder for NSIS x64. Native resources are copied outside ASAR. Before shipping, include the exact libmpv distribution's licenses/source-compliance materials and configure code signing. No installer was built here.
 
 ## Mobile
 
-There is no mobile native project in Phase 2. Phase 7 must create Android and iOS build configurations and document compatible toolchains. Android SDK/JDK and macOS/Xcode/signing will be required, but no APK, AAB or IPA is claimed here.
+Android/iOS native applications are not implemented in this phase. A responsive web UI is not a mobile native package.

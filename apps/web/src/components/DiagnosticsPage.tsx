@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import type { PlaybackState } from '../../../../packages/core/media';
-export function DiagnosticsPage({ state }: { state: PlaybackState }) {
+export function DiagnosticsPage({ state, engine }: { state: PlaybackState; engine: string }) {
   return (
     <>
       <div className="page-heading">
@@ -17,7 +17,7 @@ export function DiagnosticsPage({ state }: { state: PlaybackState }) {
           <h2>Session</h2>
           <dl>
             <dt>Engine</dt>
-            <dd>HTML media</dd>
+            <dd>{engine}</dd>
             <dt>State</dt>
             <dd>{state.status}</dd>
             <dt>Resolution</dt>
@@ -27,7 +27,11 @@ export function DiagnosticsPage({ state }: { state: PlaybackState }) {
             <dt>Speed</dt>
             <dd>{state.rate}×</dd>
             <dt>Native mpv integration</dt>
-            <dd>Not installed in Phase 2</dd>
+            <dd>
+              {engine === 'libmpv'
+                ? state.engineVersion || 'Initializing native helper'
+                : 'Not active; browser playback'}
+            </dd>
           </dl>
         </div>
         <div className="card">
@@ -47,8 +51,7 @@ export function DiagnosticsPage({ state }: { state: PlaybackState }) {
             </li>
           </ul>
           <p className="muted">
-            HLS/DASH adapters, track selection, automatic recovery, and FFmpeg inspection are not
-            implemented yet.
+            HLS/DASH adapters, automatic recovery, and FFmpeg inspection are not implemented yet.
           </p>
           {state.error && <p className="error-text">{state.error}</p>}
         </div>

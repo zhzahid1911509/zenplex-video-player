@@ -97,9 +97,9 @@ export function HomePage({
       <div className="foundation-note">
         <Layers size={18} />
         <p>
-          <strong>A foundation with real playback.</strong> This release uses browser media
-          capabilities. Native Windows codecs, streaming playlists, and Subtitle Studio are planned
-          phases.
+          <strong>A foundation with real playback.</strong> Browser playback is available for
+          compatible files. Windows x64 can use libmpv when its runtime is installed. Streaming
+          playlists and Subtitle Studio remain planned.
         </p>
       </div>
     </>

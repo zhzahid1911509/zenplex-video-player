@@ -1,62 +1,69 @@
-# ZenPlex 0.2.0
+# ZenPlex 0.3.0 — Phase 3 native playback preview
 
-A calm multimedia workspace. **Phase 2 foundation**, with real browser-compatible playback and a prepared Electron shell.
+ZenPlex now includes a Windows x64 native helper, a libmpv playback adapter, native track/subtitle controls and the existing browser player.
 
-## Run on Windows
+**Windows rendering/playback has not been verified in this Linux development environment.** The helper was cross-compiled, and the TypeScript/bridge/browser paths were tested. No libmpv DLL or Windows installer is bundled.
 
-Install Node.js 24 LTS, extract this package, and open PowerShell inside the `zenplex` folder:
+## Quick start on Windows
+
+Install Node.js 24 LTS. Extract the archive separately from your previous release and open PowerShell inside `zenplex`:
 
 ```powershell
 npm ci
-npm run dev
 ```
 
-Open **http://127.0.0.1:5173**. Choose a compatible local file, or add a direct HTTPS media URL. Drag/drop and multi-file selection are supported. For the desktop shell:
+Obtain and extract a Windows x64 libmpv distribution through the links on https://mpv.io/installation/. You need `mpv-2.dll` or `libmpv-2.dll` and its companion DLLs, not just `mpv.exe`.
 
 ```powershell
+npm run native:install -- "C:\Tools\libmpv"
+npm run native:doctor
 npm run desktop
 ```
 
-The desktop shell currently uses Chromium media playback. Native mpv support is the next phase and is not bundled.
+Use **Open files**, choose `tests/fixtures/native-multitrack.mkv`, and confirm the Player identifies **libmpv**. Full setup, troubleshooting and the acceptance checklist are in [WINDOWS_NATIVE.md](docs/WINDOWS_NATIVE.md).
 
-## What works
+## Browser playback remains available
 
-- Functional Home, Player, Play queue, Settings, Diagnostics and About views.
-- Local compatible video/audio, direct HTTPS input, play/pause, stop, seeking, volume/mute, speed, fullscreen and keyboard controls.
-- Session queue with remove, reorder, search and previous/next selection.
-- Dark/light/system themes, accent colors, density, reduced motion and video fit.
-- Validated preferences with persistence, legacy migration, JSON backup/import and reset.
-- Live engine state, resolution and buffered-duration diagnostics.
-- Secure Electron shell configuration and typed playback adapter foundation.
+```powershell
+npm run dev
+```
 
-## Limits worth understanding
+Open http://127.0.0.1:5173. This uses the HTML media adapter and browser codec support, not libmpv. Existing themes, settings, queue, keyboard controls and local playback are preserved.
 
-- A recognized filename does not prove codec support. Try `tests/fixtures/sample.webm` for a deterministic playable sample.
-- HLS/DASH/M3U imports, native tracks, subtitles, AI, library indexing, automatic recovery and mobile native apps are future phases.
-- Queue URLs and selected files are session-only. Settings persist; sensitive media URLs do not.
-- HTTPS-only remote sources. CORS, server authentication and unsupported codecs may prevent playback; no proxy bypass is provided.
-- Windows launch, installer and native rendering still require Windows verification. No Windows installer is included.
+## Native features added
 
-## Validation
+- Embedded Win32 video surface owned by a separate helper process.
+- Local-file permissions represented by opaque tokens in the UI.
+- Direct HTTPS playback path, track metadata, audio/subtitle selection.
+- External SRT/VTT/ASS/SSA subtitles, audio/subtitle delay and frame stepping.
+- Fit/fill/stretch, playback speed, volume, mute, seek, stop and pause.
+- Native fullscreen and fixed shortcut forwarding.
+- Bounded IPC, initialization/command deadlines, crash feedback and cleanup.
+- Runtime installation/check scripts, CMake source build and a Windows integration harness.
+
+These native implementations require Windows runtime verification. Broad codec coverage is not inferred from the presence of libmpv.
+
+## Tests and builds
 
 ```powershell
 npm run check
 npx playwright install chromium
 npm run test:e2e
+npm run test:native
 ```
 
-See [validation results](docs/VALIDATION.md) for what was actually run, [build instructions](docs/BUILDING.md) for packaging, [architecture](docs/ARCHITECTURE.md), [security](docs/SECURITY.md), and the [feature matrix](docs/FEATURES.md).
+`test:native` requires Windows x64 and the installed native runtime. See [validation](docs/VALIDATION.md) for actual results and pending checks.
 
-## Layout
+To rebuild the included helper with Visual Studio Build Tools/CMake: `npm run native:build`.
+To prepare an unsigned installer after installing/auditing the runtime: `npm run package:win`. Installer execution and signing remain unverified here.
 
-- `apps/web/`: React interface and HTML playback adapter.
-- `apps/desktop/`: Electron main/preload.
-- `packages/core/`: playback contract, media validation and formatting.
-- `packages/settings/`: schemas, migration, persistence.
-- `assets/`: original SVG/PNG/ICO branding.
-- `tests/`: unit, component, browser tests and synthetic media.
-- `docs/`: scope, engineering decisions, limitations and next gates.
+## Documentation
 
-## Next phase
+- [Windows native setup and acceptance](docs/WINDOWS_NATIVE.md)
+- [Phase 3 architecture](docs/PHASE3_ARCHITECTURE.md)
+- [Feature matrix](docs/FEATURES.md)
+- [Security and privacy](docs/SECURITY.md)
+- [Third-party notices](THIRD_PARTY_NOTICES.md)
+- [Changed/source files](docs/FILES.md)
 
-Phase 3: implement and test the native Windows playback helper. Start with embedded rendering, DPI/resize/fullscreen/focus and resource cleanup before expanding codec claims or advanced controls.
+**Next gate:** run the native integration test and manual Windows rendering/DPI/focus/fullscreen checks. Phase 4 streaming and playlist work follows that gate; it is not included in this release.

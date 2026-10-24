@@ -6,3 +6,7 @@ test-results
 playwright-report
 package-lock.json
 audit.json
+
+native/player-host/vendor
+native/player-host/out
+native/player-host/build

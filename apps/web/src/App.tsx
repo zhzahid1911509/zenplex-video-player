@@ -1,3 +1,6 @@
+import { PlaylistPanel } from './components/PlaylistPanel';
+import { classifyUrl } from '../../../packages/streaming/playlist';
+import { PlaybackRecovery, type RecoveryState } from '../../../packages/streaming/recovery';
 import { AboutPage } from './components/AboutPage';
 import { DiagnosticsPage } from './components/DiagnosticsPage';
 import { HomePage } from './components/HomePage';
@@ -55,6 +58,14 @@ export function App() {
   const [urlOpen, setUrlOpen] = useState(false);
   const [notice, setNotice] = useState('');
   const [search, setSearch] = useState('');
+  const [group, setGroup] = useState('');
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const recovery = useRef<PlaybackRecovery | null>(null);
+  const [recoveryState, setRecoveryState] = useState<RecoveryState>({
+    attempts: 0,
+    pending: false,
+    exhausted: false,
+  });
   const video = useRef<HTMLVideoElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -126,14 +137,19 @@ export function App() {
   }, [adapter, settings.playbackRate]);
   useEffect(() => {
     if (adapter && active) {
-      adapter.openMedia(active);
-      void adapter.play();
+      const controller = new PlaybackRecovery(adapter, active, setRecoveryState);
+      recovery.current = controller;
+      controller.start();
+      return () => {
+        controller.dispose();
+        recovery.current = null;
+      };
     } else adapter?.closeMedia();
   }, [adapter, active]);
   const toggle = useCallback(() => {
     if (!adapter || !active) return;
-    if (adapter.getPlaybackState().status === 'playing') adapter.pause();
-    else void adapter.play();
+    if (adapter.getPlaybackState().status === 'playing') recovery.current?.pause();
+    else recovery.current?.play();
   }, [adapter, active]);
   const fullscreen = useCallback(async () => {
     try {
@@ -287,7 +303,7 @@ export function App() {
     }
     if (rejected || candidates.length > remaining)
       setNotice(
-        'Some files were skipped. This build accepts up to 200 media files per session; playlist and subtitle imports are not yet enabled.',
+        'Some files were skipped. This build accepts up to 200 media files per session; use Import channels in Play queue for playlists, or native subtitle controls for subtitles.',
       );
   }
   function remove(id: string) {
@@ -318,16 +334,26 @@ export function App() {
     });
   }
   const activeIndex = queue.findIndex((item) => item.id === active?.id);
+  const filtered = queue.filter(
+    (item) =>
+      (!group || item.group === group) &&
+      (!favoritesOnly || item.favorite) &&
+      `${item.title} ${item.group ?? ''} ${item.channelId ?? ''}`
+        .toLowerCase()
+        .includes(search.toLowerCase()),
+  );
   const queueView = (
     <QueuePanel
-      items={queue.filter((item) => item.title.toLowerCase().includes(search.toLowerCase()))}
+      items={filtered}
+      onFavorite={(id) =>
+        setQueue((current) =>
+          current.map((item) => (item.id === id ? { ...item, favorite: !item.favorite } : item)),
+        )
+      }
       activeId={active?.id}
       onPlay={select}
       onRemove={remove}
       onMove={(index) => {
-        const filtered = queue.filter((item) =>
-          item.title.toLowerCase().includes(search.toLowerCase()),
-        );
         const item = filtered[index];
         if (item) move(queue.indexOf(item));
       }}
@@ -385,7 +411,7 @@ export function App() {
               <p>Your files stay on your device.</p>
             </div>
           </div>
-          <span className="version">v0.3.0 · Native preview</span>
+          <span className="version">v0.4.0 · Streaming preview</span>
         </div>
       </aside>
       <div className="content">
@@ -482,10 +508,7 @@ export function App() {
                     <p>{state.error}</p>
                     <button
                       onClick={() => {
-                        if (active) {
-                          adapter?.openMedia(active);
-                          void adapter?.play();
-                        }
+                        recovery.current?.retry();
                       }}
                     >
                       Retry playback
@@ -497,7 +520,7 @@ export function App() {
                 state={state}
                 enabled={!!active}
                 onToggle={toggle}
-                onStop={() => adapter?.stop()}
+                onStop={() => recovery.current?.stop()}
                 onSeek={(value) => adapter?.seek(value)}
                 onVolume={(value) => {
                   adapter?.setMuted(false);
@@ -525,6 +548,17 @@ export function App() {
             {adapter instanceof NativePlaybackAdapter && active && (
               <NativeControls engine={adapter} state={state} onDialog={setNativeDialog} />
             )}
+            {active?.kind === 'url' && (
+              <p className="notice" role="status">
+                {active.streamType?.toUpperCase() ?? 'HTTPS'} · Buffered ahead:{' '}
+                {Math.max(0, state.buffered - state.position).toFixed(1)} s · Recovery{' '}
+                {recoveryState.attempts}/3
+                {recoveryState.pending ? ' · Waiting for playback or retry' : ''}
+                {recoveryState.exhausted && state.status === 'error'
+                  ? ' · Automatic retries exhausted; check the source and retry manually.'
+                  : ''}
+              </p>
+            )}
             <p className="shortcuts">
               <kbd>Space</kbd> Play / pause <kbd>← →</kbd> Seek 5s <kbd>M</kbd> Mute <kbd>F</kbd>{' '}
               Fullscreen <kbd>O</kbd> Open
@@ -546,6 +580,48 @@ export function App() {
                     file.
                   </p>
                 </div>
+              </div>
+              <PlaylistPanel
+                onImport={(items) => {
+                  setQueue((current) => {
+                    const seen = new Set(current.map((item) => item.url));
+                    const added = items
+                      .filter((item) => !seen.has(item.url))
+                      .slice(0, Math.max(0, 200 - current.length));
+                    return [...current, ...added];
+                  });
+                  setNotice(
+                    'Channels added where space permits. Duplicate URLs are skipped; the queue limit is 200.',
+                  );
+                }}
+              />
+              <div className="channel-filters">
+                <label>
+                  Channel group
+                  <select value={group} onChange={(e) => setGroup(e.target.value)}>
+                    <option value="">All groups</option>
+                    {[
+                      ...new Set(
+                        queue.map((item) => item.group).filter((value): value is string => !!value),
+                      ),
+                    ]
+                      .sort()
+                      .map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                  </select>
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={favoritesOnly}
+                    onChange={(e) => setFavoritesOnly(e.target.checked)}
+                  />{' '}
+                  Favorites only
+                </label>
+                <span className="muted">
+                  {filtered.length} of {queue.length} items
+                </span>
               </div>
               <label className="search-label">
                 Search queue
@@ -603,7 +679,13 @@ export function App() {
               setNotice('The queue is full. Remove an item before adding another.');
               return;
             }
-            const item: MediaSource = { id: crypto.randomUUID(), url, title, kind: 'url' };
+            const item: MediaSource = {
+              id: crypto.randomUUID(),
+              url,
+              title,
+              kind: 'url',
+              streamType: classifyUrl(url) as 'direct' | 'hls' | 'dash',
+            };
             setQueue((current) => [...current, item]);
             select(item);
           }}

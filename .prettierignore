@@ -10,3 +10,5 @@ audit.json
 native/player-host/vendor
 native/player-host/out
 native/player-host/build
+
+tests/fixtures

@@ -7,7 +7,7 @@
   "files": [
     {
       "path": "main.cpp",
-      "sha256": "354e2e7bb0591ab0736cbdb7c6da0eb3c59afd20c2af43b28a617b8e74587fb5"
+      "sha256": "82e480e006f8da1b1a44a24ff1bb533b8e64be9baf2144e88bb9c2cacffa0c75"
     },
     {
       "path": "input.conf",
@@ -31,7 +31,7 @@
     },
     {
       "path": "out/zenplex-player-host.exe",
-      "sha256": "258d6000e79afbcc561df0348307fe624fb905b93b96d099ad1ba83bf769447c"
+      "sha256": "446d51d9e4d40235b7c41bba8d691373f225cc9dd2301ecfd345ab0563f77bec"
     }
   ]
 }

@@ -19,3 +19,13 @@
 - Added runtime installation/doctor/build scripts, multitrack test media and a real Windows integration harness.
 - Preserved and regression-tested the browser player.
 - Windows runtime/rendering, live native URLs, native codec coverage and installer verification remain pending. No libmpv DLL is bundled.
+
+## 0.4.0 — Phase 4 streaming preview
+
+- Extended M3U file/URL import with bounds, deduplication, group metadata and rejected-entry counts.
+- Channel group/search/favorite filters; favorites intentionally remain session-only.
+- Lazy-loaded hls.js 1.7.3 and dash.js 5.2.1, with generation guards and cleanup.
+- HLS/DASH native source allowance with per-helper adaptive reference handling.
+- Finite reconnection, stall deadlines, pause/stop cancellation, VOD position restoration and buffering counters.
+- Includes the Phase 3 render-frame startup correction and startup/load rejection handling.
+- Synthetic HLS/DASH media and browser tests; Windows execution remains unverified.

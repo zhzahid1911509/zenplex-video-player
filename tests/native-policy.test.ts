@@ -44,7 +44,7 @@ it.each([
   'https://user:pass@example.com/a.mp4',
   'https://example.com:8443/a.mp4',
   'https://localhost/a',
-  'https://example.com/list.m3u8',
+  'https://example.com/list.m3u',
 ])(
   'rejects unsupported native URL %s',
   async (url) => await expect(validateNativeUrl(url)).rejects.toThrow(),
@@ -75,3 +75,10 @@ it('limits external subtitle size and format', async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+it.each(['https://example.com/live.m3u8?key=private', 'https://example.com/movie.mpd'])(
+  'accepts adaptive input after public DNS preflight',
+  async (url) => {
+    const resolve = async () => [{ address: '8.8.8.8', family: 4 }];
+    await expect(validateNativeUrl(url, resolve)).resolves.toBe(url);
+  },
+);

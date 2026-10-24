@@ -17,7 +17,13 @@ export function publicV4(address: string): boolean {
     (a === 203 && b === 0 && c === 113)
   );
 }
-export async function validateNativeUrl(value: string, resolve = lookup) {
+export async function validateNativeUrl(
+  value: string,
+  resolve: (
+    hostname: string,
+    options: { all: true; family: 4 },
+  ) => Promise<{ address: string; family: number }[]> = lookup,
+) {
   const url = new URL(value.trim());
   if (
     url.protocol !== 'https:' ||
@@ -29,9 +35,9 @@ export async function validateNativeUrl(value: string, resolve = lookup) {
     url.hostname === 'localhost' ||
     url.hostname.endsWith('.local') ||
     url.hostname.endsWith('.localhost') ||
-    /\.(m3u8?|mpd)$/i.test(url.pathname)
+    /\.m3u$/i.test(url.pathname)
   )
-    throw new Error('Use a public HTTPS direct-media URL on port 443.');
+    throw new Error('Use a public HTTPS media or HLS/DASH URL on port 443.');
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const records = await Promise.race([

@@ -1112,3 +1112,28 @@ dialog p {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.playlist-import {
+  margin-bottom: 24px;
+}
+.playlist-import form {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.playlist-import form label {
+  flex: 1;
+  min-width: 220px;
+}
+.channel-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  margin: 20px 0;
+}
+.channel-filters input[type='checkbox'] {
+  width: auto;
+}

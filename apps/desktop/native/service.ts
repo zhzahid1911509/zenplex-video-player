@@ -197,7 +197,10 @@ export class NativeService {
         const { op, ...args } = preference;
         await channel.request(op, args);
       }
-      await channel.request('open', { source });
+      await channel.request('open', {
+        source,
+        adaptive: /^https:\/\//i.test(source) && /\.(m3u8|mpd)(?:[?#]|$)/i.test(source),
+      });
       await channel.request(this.paused ? 'pause' : 'play');
     } catch (error) {
       if (epoch === this.epoch) {

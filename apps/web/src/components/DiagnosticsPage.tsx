@@ -51,7 +51,9 @@ export function DiagnosticsPage({ state, engine }: { state: PlaybackState; engin
             </li>
           </ul>
           <p className="muted">
-            HLS/DASH adapters, automatic recovery, and FFmpeg inspection are not implemented yet.
+            HLS/DASH playback depends on engine codec support and server access. Recovery uses up to
+            three reconnects per source; its counter appears in Player. FFmpeg inspection is not
+            included.
           </p>
           {state.error && <p className="error-text">{state.error}</p>}
         </div>

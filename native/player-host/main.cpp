@@ -120,7 +120,10 @@ void dispatch(const json& request) {
       SetWindowPos(host, HWND_TOP, static_cast<int>(std::lround(x * scale)), static_cast<int>(std::lround(y * scale)), std::max(1, static_cast<int>(std::lround(w * scale))), std::max(1, static_cast<int>(std::lround(h * scale))), SWP_NOACTIVATE | (visible ? SWP_SHOWWINDOW : SWP_HIDEWINDOW));
     } else if (op == "open") {
       if (loaded) throw std::runtime_error("A helper instance owns one source only.");
-      const auto source = inputString(request, "source"); loaded = false; failure.clear(); command({"loadfile", source, "replace"});
+      const auto source = inputString(request, "source");
+      const bool adaptive = request.value("adaptive", false) && source.rfind("https://", 0) == 0;
+      set("access-references", adaptive ? "yes" : "no");
+      loaded = false; failure.clear(); command({"loadfile", source, "replace"});
     } else if (op == "play") { if (flag("eof-reached")) command({"seek", "0", "absolute+exact"}); set("pause", "no"); }
     else if (op == "pause") set("pause", "yes");
     else if (op == "stop") { set("pause", "yes"); if (loaded) command({"seek", "0", "absolute+exact"}); }

@@ -1,9 +1,9 @@
 {
   "name": "zenplex",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "ZenPlex Phase 3 Windows native playback preview",
+  "description": "ZenPlex Phase 4 streaming and playlist preview",
   "main": "dist-desktop/apps/desktop/main.js",
   "engines": {
     "node": ">=22.12.0"
@@ -62,10 +62,16 @@
       {
         "from": "THIRD_PARTY_NOTICES.md",
         "to": "THIRD_PARTY_NOTICES.md"
+      },
+      {
+        "from": "docs/licenses",
+        "to": "licenses"
       }
     ]
   },
   "dependencies": {
+    "dashjs": "5.2.1",
+    "hls.js": "1.7.3",
     "lucide-react": "1.61.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",

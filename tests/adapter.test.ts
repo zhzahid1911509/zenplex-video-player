@@ -77,10 +77,20 @@ it('ignores a late play rejection from a replaced source', async () => {
   const adapter = new HtmlMediaAdapter(video);
   adapter.openMedia({ id: 'old', title: 'Old', url: 'blob:old', kind: 'file' });
   const pending = adapter.play();
+  await Promise.resolve();
   adapter.openMedia({ id: 'new', title: 'New', url: 'blob:new', kind: 'file' });
   reject(new Error('old source failed'));
   await pending;
   expect(adapter.getPlaybackState().status).toBe('loading');
   expect(adapter.getPlaybackState().error).toBeNull();
+  adapter.dispose();
+});
+it('does not start delayed playback after an explicit pause', async () => {
+  const adapter = new HtmlMediaAdapter(video);
+  adapter.openMedia({ id: '1', url: 'blob:test', title: 'Test', kind: 'file' });
+  const pending = adapter.play();
+  adapter.pause();
+  await pending;
+  expect(video.play).not.toHaveBeenCalled();
   adapter.dispose();
 });

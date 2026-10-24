@@ -6,15 +6,15 @@ export function AboutPage() {
         <div>
           <span className="eyebrow">CALM. PRECISE. YOURS.</span>
           <h1>Meet ZenPlex.</h1>
-          <p className="muted">Version 0.3.0 · Windows native preview</p>
+          <p className="muted">Version 0.4.0 · Streaming preview</p>
         </div>
         <Sparkles size={32} />
       </div>
       <div className="card">
         <h2>A player built in honest steps.</h2>
         <p>
-          This build adds a Windows native helper and libmpv adapter. Windows runtime acceptance
-          tests remain required before a production release.
+          This build adds M3U channels, HLS/DASH playback, favorites, and bounded recovery. Windows
+          runtime acceptance tests remain required before a production release.
         </p>
         <h3>Privacy</h3>
         <p>
@@ -30,8 +30,8 @@ export function AboutPage() {
         </p>
         <h3>What comes next</h3>
         <p>
-          Verify native rendering, tracks, fullscreen, DPI changes and cleanup on Windows before
-          moving to Phase 4 streaming and playlists.
+          AI Subtitle Studio is next in the implementation plan. Windows native and streaming
+          acceptance checks remain required before release.
         </p>
       </div>
     </>

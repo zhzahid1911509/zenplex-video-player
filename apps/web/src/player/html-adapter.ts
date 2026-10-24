@@ -1,3 +1,4 @@
+import { classifyUrl } from '../../../../packages/streaming/playlist';
 import {
   initialPlayback,
   type MediaSource,
@@ -20,6 +21,9 @@ export class HtmlMediaAdapter implements PlaybackAdapter {
   private cleanups: (() => void)[] = [];
   private disposed = false;
   private generation = 0;
+  private playIntent = 0;
+  private streamCleanup?: () => void;
+  private streamReady: Promise<void> = Promise.resolve();
   constructor(private video: HTMLVideoElement) {
     const statuses: Partial<Record<keyof HTMLMediaElementEventMap, PlaybackStatus>> = {
       loadstart: 'loading',
@@ -84,6 +88,8 @@ export class HtmlMediaAdapter implements PlaybackAdapter {
   }
   openMedia(source: MediaSource) {
     this.generation++;
+    this.streamCleanup?.();
+    this.streamCleanup = undefined;
     this.video.pause();
     this.update({
       ...initialPlayback,
@@ -92,11 +98,71 @@ export class HtmlMediaAdapter implements PlaybackAdapter {
       muted: this.video.muted,
       rate: this.video.playbackRate,
     });
-    this.video.src = source.url;
-    this.video.load();
+    const kind = source.kind === 'url' ? (source.streamType ?? classifyUrl(source.url)) : 'direct';
+    if (kind === 'hls' || kind === 'dash') {
+      const generation = this.generation;
+      this.video.removeAttribute('src');
+      this.video.load();
+      this.streamReady = this.attachStream(kind, source.url, generation).catch(() => {
+        if (generation === this.generation && !this.disposed)
+          this.update({
+            status: 'error',
+            error:
+              'Streaming could not initialize. Check browser codec support, HTTPS access, and CORS permissions.',
+          });
+      });
+    } else {
+      this.streamReady = Promise.resolve();
+      this.video.src = source.url;
+      this.video.load();
+    }
+  }
+  private async attachStream(kind: 'hls' | 'dash', url: string, generation: number) {
+    const current = () => !this.disposed && generation === this.generation;
+    const fail = () => {
+      if (current())
+        this.update({
+          status: 'error',
+          error:
+            'Stream loading failed. Check network access, URL expiry, CORS, and supported codecs.',
+        });
+    };
+    if (kind === 'hls') {
+      if (this.video.canPlayType('application/vnd.apple.mpegurl')) {
+        this.video.src = url;
+        this.video.load();
+        return;
+      }
+      const { default: Hls } = await import('hls.js');
+      if (!current()) return;
+      if (!Hls.isSupported()) throw new Error('HLS unsupported');
+      const hls = new Hls({ enableWorker: false, maxBufferLength: 30, backBufferLength: 30 });
+      this.streamCleanup = () => hls.destroy();
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) fail();
+      });
+      hls.attachMedia(this.video);
+      hls.loadSource(url);
+    } else {
+      const { MediaPlayer } = await import('dashjs');
+      if (!current()) return;
+      const player = MediaPlayer().create();
+      this.streamCleanup = () => player.reset();
+      player.updateSettings({
+        debug: { logLevel: 0 },
+        streaming: {
+          retryAttempts: { MPD: 1, MediaSegment: 2 },
+          buffer: { bufferTimeDefault: 20, bufferToKeep: 20 },
+        },
+      });
+      player.on(MediaPlayer.events.ERROR, fail);
+      player.initialize(this.video, url, false);
+    }
   }
   closeMedia() {
     this.generation++;
+    this.streamCleanup?.();
+    this.streamCleanup = undefined;
     this.video.pause();
     this.video.removeAttribute('src');
     this.video.load();
@@ -109,7 +175,16 @@ export class HtmlMediaAdapter implements PlaybackAdapter {
   }
   async play() {
     const generation = this.generation;
+    const intent = ++this.playIntent;
     try {
+      await this.streamReady;
+      if (
+        intent !== this.playIntent ||
+        generation !== this.generation ||
+        this.disposed ||
+        this.state.status === 'error'
+      )
+        return;
       await this.video.play();
     } catch (error) {
       if (generation !== this.generation || this.disposed) return;
@@ -121,9 +196,11 @@ export class HtmlMediaAdapter implements PlaybackAdapter {
     }
   }
   pause() {
+    ++this.playIntent;
     this.video.pause();
   }
   stop() {
+    ++this.playIntent;
     this.video.pause();
     if (this.video.readyState > 0) this.video.currentTime = 0;
     this.update({ status: 'paused', position: 0 });
@@ -163,6 +240,8 @@ export class HtmlMediaAdapter implements PlaybackAdapter {
   dispose() {
     this.generation++;
     this.disposed = true;
+    this.streamCleanup?.();
+    this.streamCleanup = undefined;
     this.cleanups.forEach((cleanup) => cleanup());
     this.cleanups = [];
     this.listeners.clear();

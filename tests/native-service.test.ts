@@ -105,3 +105,8 @@ it('does not write settings into a helper before its readiness handshake', async
   await pending;
   expect(f.received.find((m) => m.op === 'volume')?.value).toBe(0.2);
 });
+it('enables adaptive references only for HTTPS HLS/DASH sources', async () => {
+  const f = fixture();
+  await f.service.open('https://example.com/live.m3u8?key=secret', 'adaptive');
+  expect(f.received.find((m) => m.op === 'open')).toMatchObject({ adaptive: true });
+});

@@ -1,4 +1,4 @@
-import { Play, X, ArrowUp, Film } from 'lucide-react';
+import { Play, X, ArrowUp, Film, Star } from 'lucide-react';
 import type { MediaSource } from '../../../../packages/core/media';
 export function QueuePanel({
   items,
@@ -6,12 +6,14 @@ export function QueuePanel({
   onPlay,
   onRemove,
   onMove,
+  onFavorite,
 }: {
   items: MediaSource[];
   activeId?: string;
   onPlay: (item: MediaSource) => void;
   onRemove: (id: string) => void;
   onMove: (index: number) => void;
+  onFavorite?: (id: string) => void;
 }) {
   return (
     <div className="queue-list">
@@ -36,10 +38,22 @@ export function QueuePanel({
                 <strong>{item.title}</strong>
                 <small>
                   {item.kind === 'file' ? 'Local file' : 'HTTPS media'}
+                  {item.group ? ` · ${item.group}` : ''}
+                  {item.streamType ? ` · ${item.streamType.toUpperCase()}` : ''}
                   {activeId === item.id ? ' · Selected' : ''}
                 </small>
               </span>
             </button>
+            {onFavorite && (
+              <button
+                className="icon"
+                aria-label={`Favorite ${item.title}`}
+                aria-pressed={!!item.favorite}
+                onClick={() => onFavorite(item.id)}
+              >
+                <Star size={16} fill={item.favorite ? 'currentColor' : 'none'} />
+              </button>
+            )}
             <button
               className="icon"
               disabled={index === 0}

@@ -98,8 +98,8 @@ export function HomePage({
         <Layers size={18} />
         <p>
           <strong>A foundation with real playback.</strong> Browser playback is available for
-          compatible files. Windows x64 can use libmpv when its runtime is installed. Streaming
-          playlists and Subtitle Studio remain planned.
+          compatible files. Windows x64 can use libmpv when its runtime is installed. Import channel
+          playlists from Play queue, or open an HLS/DASH URL. Subtitle Studio is planned next.
         </p>
       </div>
     </>

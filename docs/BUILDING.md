@@ -1,4 +1,4 @@
-# Building ZenPlex 0.3.0
+# Building ZenPlex 0.4.0
 
 Use Node.js 24 LTS and npm. Dependencies are pinned in package-lock.json.
 

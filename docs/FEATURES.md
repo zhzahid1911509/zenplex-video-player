@@ -1,4 +1,4 @@
-# Feature completion — 0.3.0
+# Feature completion — 0.4.0
 
 | Capability                                               | Implementation                       | Verification                                                   |
 | -------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------- |
@@ -15,7 +15,8 @@
 | Cleanup, deadlines, bounded transport, session isolation | Implemented                          | Automated transport/lifecycle tests                            |
 | Native setup/doctor/Windows test harness                 | Implemented                          | Doctor correctly detects missing DLL; Windows test not run     |
 | Windows NSIS installer                                   | Configuration updated                | No installer generated                                         |
-| M3U/HLS/DASH and automatic network recovery              | Planned Phase 4                      | Not implemented                                                |
+| M3U import, groups/search/session favorites | Implemented | Parser and browser workflow tests |
+| HLS/DASH and bounded network recovery | Implemented | Actual browser manifest/segment playback; native Windows pending |
 | AI Subtitle Studio                                       | Planned Phase 5                      | Not implemented                                                |
 | Advanced library and per-file persistence                | Planned Phase 6                      | Session queue only                                             |
 | Android/iOS native applications                          | Planned Phase 7                      | Not implemented                                                |

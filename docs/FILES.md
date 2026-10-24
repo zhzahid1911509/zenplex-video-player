@@ -1,6 +1,6 @@
-# Source and deliverable files — 0.3.0
+# Source and deliverable files — 0.4.0
 
-All paths are relative to the extracted `zenplex/` folder.
+See STREAMING.md for the main Phase 4 changes.
 
 - `.gitignore`
 - `.prettierignore`
@@ -21,6 +21,7 @@ All paths are relative to the extracted `zenplex/` folder.
 - `apps/web/src/components/DiagnosticsPage.tsx`
 - `apps/web/src/components/HomePage.tsx`
 - `apps/web/src/components/NativeControls.tsx`
+- `apps/web/src/components/PlaylistPanel.tsx`
 - `apps/web/src/components/QueuePanel.tsx`
 - `apps/web/src/components/RangeControl.tsx`
 - `apps/web/src/components/SettingsPanel.tsx`
@@ -37,14 +38,31 @@ All paths are relative to the extracted `zenplex/` folder.
 - `assets/zenplex.png`
 - `assets/zenplex.svg`
 - `audit.json`
+- `dist/assets/SettingsPanel-1IUxHaYA.js`
+- `dist/assets/dash.all.min-Bjr30Hx0.js`
+- `dist/assets/hls-CydbS6hn.js`
+- `dist/assets/index-3AyzPMkQ.css`
+- `dist/assets/index-DmJwJ9qj.js`
+- `dist/index.html`
+- `dist/zenplex.svg`
+- `dist-desktop/apps/desktop/main.js`
+- `dist-desktop/apps/desktop/native/channel.js`
+- `dist-desktop/apps/desktop/native/files.js`
+- `dist-desktop/apps/desktop/native/network.js`
+- `dist-desktop/apps/desktop/native/service.js`
+- `dist-desktop/apps/desktop/preload.cjs`
+- `dist-desktop/packages/native/protocol.js`
 - `docs/ARCHITECTURE.md`
 - `docs/BUILDING.md`
 - `docs/FEATURES.md`
 - `docs/FILES.md`
 - `docs/PHASE3_ARCHITECTURE.md`
 - `docs/SECURITY.md`
+- `docs/STREAMING.md`
 - `docs/VALIDATION.md`
 - `docs/WINDOWS_NATIVE.md`
+- `docs/licenses/dashjs-LICENSE.md`
+- `docs/licenses/hls.js-LICENSE.txt`
 - `eslint.config.js`
 - `native/player-host/BUILD-MANIFEST.json`
 - `native/player-host/CMakeLists.txt`
@@ -60,6 +78,8 @@ All paths are relative to the extracted `zenplex/` folder.
 - `packages/core/media.ts`
 - `packages/native/protocol.ts`
 - `packages/settings/index.ts`
+- `packages/streaming/playlist.ts`
+- `packages/streaming/recovery.ts`
 - `playwright.config.ts`
 - `scripts/build-native.ps1`
 - `scripts/install-native.mjs`
@@ -67,9 +87,19 @@ All paths are relative to the extracted `zenplex/` folder.
 - `tests/adapter.test.ts`
 - `tests/e2e/foundation.spec.ts`
 - `tests/e2e/native-ui.spec.ts`
+- `tests/e2e/streaming.spec.ts`
 - `tests/fixtures/native-multitrack.mkv`
 - `tests/fixtures/native-subtitle.srt`
 - `tests/fixtures/sample.webm`
+- `tests/fixtures/streaming/chunk-stream0-00001.webm`
+- `tests/fixtures/streaming/chunk-stream0-00002.webm`
+- `tests/fixtures/streaming/chunk-stream0-00003.webm`
+- `tests/fixtures/streaming/init-stream0.webm`
+- `tests/fixtures/streaming/sample.m3u8`
+- `tests/fixtures/streaming/sample.mpd`
+- `tests/fixtures/streaming/sample0.mpegts`
+- `tests/fixtures/streaming/sample1.mpegts`
+- `tests/fixtures/streaming/sample2.mpegts`
 - `tests/media.test.ts`
 - `tests/native-adapter.test.ts`
 - `tests/native-channel.test.ts`
@@ -78,9 +108,8 @@ All paths are relative to the extracted `zenplex/` folder.
 - `tests/settings-ui.test.tsx`
 - `tests/settings.test.ts`
 - `tests/setup.ts`
+- `tests/streaming.test.ts`
 - `tests/windows/native-smoke.mjs`
 - `tsconfig.desktop.json`
 - `tsconfig.json`
 - `vite.config.ts`
-
-Generated outputs included: `dist/`, `dist-desktop/`, and `native/player-host/out/zenplex-player-host.exe`. The helper is cross-compiled but not run on Windows. No libmpv DLL is bundled.

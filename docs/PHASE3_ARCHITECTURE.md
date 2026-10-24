@@ -24,7 +24,7 @@ Volume, mute, speed and fit preferences are applied before loading each new sour
 
 ## Network boundary
 
-Native URL input is restricted to public-looking HTTPS on port 443, with a bounded public-IPv4 DNS preflight. No cookies, custom headers, yt-dlp, proxy or DRM handling is provided. **This is not a comprehensive SSRF prevention layer:** libmpv performs its own DNS resolution and redirects, and the preflight does not pin subsequent connections or police every demuxer. Treat direct native URLs as user-authorized client requests. Do not expose this client as a remote playback service. Phase 4 must implement the network/redirect policy before importing untrusted playlist networks at scale.
+Native URL input is restricted to public-looking HTTPS on port 443, with a bounded public-IPv4 DNS preflight. No cookies, custom headers, yt-dlp, proxy or DRM handling is provided. **This is not a comprehensive SSRF prevention layer:** libmpv performs its own DNS resolution and redirects, and the preflight does not pin subsequent connections or police every demuxer. Treat direct native URLs as user-authorized client requests. Do not expose this client as a remote playback service. For current Phase 4 behavior and remaining client network limitations, see STREAMING.md and SECURITY.md.
 
 ## Files added
 

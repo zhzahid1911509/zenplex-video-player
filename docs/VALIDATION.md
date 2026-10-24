@@ -1,4 +1,4 @@
-# Validation — ZenPlex 0.3.0
+# Validation — ZenPlex 0.4.0
 
 Validation date: 24 October 2026. Development host: Linux, Node 24.19.0, npm 11.9.0.
 
@@ -6,8 +6,8 @@ Validation date: 24 October 2026. Development host: Linux, Node 24.19.0, npm 11.
 | --------------------------------------------------- | -------------------------------------------------------------- |
 | ESLint                                              | Passed                                                         |
 | Strict TypeScript, renderer/desktop/shared protocol | Passed                                                         |
-| Vitest unit/component tests                         | **83 passed**, 8 files                                         |
-| Browser E2E tests                                   | **7 passed**                                                   |
+| Vitest unit/component tests                         | **98 passed**, 9 files                                         |
+| Browser E2E tests                                   | **12 passed**                                                   |
 | Production renderer build                           | Passed                                                         |
 | Electron main/preload/service compilation           | Passed                                                         |
 | Windows x64 helper cross-compilation                | Passed using Zig 0.17.0                                        |
@@ -32,10 +32,20 @@ The helper's Windows binary was built from the supplied source and inspected as 
 
 ## Browser runtime used
 
-The restricted host used Chromium 153.0.8010.0 from an external @sparticuz/chromium test installation via ZENPLEX_TEST_CHROMIUM. That browser and the cross-compiler are not bundled with ZenPlex. A first attempt referred to an expired temporary browser path; after restoring the test runtime, all seven tests passed.
+The restricted host used Chromium 153.0.8010.0 from an external @sparticuz/chromium test installation via ZENPLEX_TEST_CHROMIUM. That browser and the cross-compiler are not bundled with ZenPlex. A first attempt referred to an expired temporary browser path; after restoring the test runtime, all applicable tests passed.
 
 ## Windows acceptance
 
 Run the supplied `npm run test:native` on Windows x64 after installing the libmpv runtime. It opens a real Electron window and native helper with `native-multitrack.mkv`, checks decoder time progress and track/control operations, and writes `test-results/native-windows.json` on success. That test was authored but not executed on this host.
 
 Complete the manual matrix in [WINDOWS_NATIVE.md](WINDOWS_NATIVE.md). Phase 3's Windows acceptance gate remains open. No fabricated native test result or installer is included.
+
+## Phase 4 evidence
+
+Five streaming browser tests cover local M3U categories/search/session favorites and responsive layout; real HLS/H.264 MPEG-TS playback; real DASH/VP9 WebM playback; CORS-enabled remote M3U import without autoplay; and a simulated HTTP 503 followed by successful reconnection to real media bytes. HTTPS responses are intercepted fixtures, not live public streams. The seven prior browser tests remain passing.
+
+Unit coverage includes parser size/count limits, malformed inputs, Unicode/quoted commas, relative entries, unsafe schemes, duplicates, classification, credential-free fetch options, retry caps/cancellation/VOD restoration, adaptive native preflight and async play cancellation.
+
+ESLint, strict TypeScript, production builds and native x64 cross-compilation passed. npm audit reports zero known vulnerabilities in the captured audit.json. Lazy HLS/DASH chunks exceed Vite's 500 kB warning threshold (about 574/822 kB minified); they load only when the corresponding format is selected. This is a build warning, not a runtime error.
+
+Native Windows HLS/DASH, live-provider CORS/auth behavior, live-window seeking, encrypted HLS, and broad codec coverage remain unverified. The supplied Windows test still focuses on local native playback. Bangla text is preserved by parser/UI tests; the minimal Linux test browser lacks Bangla fonts, so Windows glyph rendering still needs visual acceptance.

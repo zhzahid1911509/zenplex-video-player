@@ -1,4 +1,4 @@
-# Security and privacy — 0.3.0 native preview
+# Security and privacy — 0.4.0 native preview
 
 ## Implemented boundaries
 
@@ -16,9 +16,9 @@
 
 ## Scope of network validation
 
-The native direct-URL path accepts HTTPS on port 443 and performs an initial public-IPv4 DNS check with a timeout. It rejects obvious local/IP-literal/auth-in-URL inputs and known playlist/manifest filename candidates. The browser path retains its HTTPS input validation and browser networking behavior.
+The native direct-URL path accepts HTTPS on port 443 and performs an initial public-IPv4 DNS check with a timeout. It rejects obvious local/IP-literal/auth-in-URL inputs and nested .m3u channel-list inputs. HLS/DASH URLs are accepted. The browser path retains its HTTPS input validation and browser networking behavior.
 
-**This is not a complete network sandbox or SSRF firewall.** Native libmpv resolves hosts itself and can follow redirects after the preflight; DNS changes, IPv6 choices, nested demuxer requests and redirection are not pinned/centrally intercepted. The mpv manual also documents limitations of `access-references=no`. Native links in this preview are explicitly user-initiated client requests. Do not expose the app as an unattended remote URL-processing backend. Phase 4 network/playlist handling must strengthen this boundary before broad untrusted playlist import.
+**This is not a complete network sandbox or SSRF firewall.** Native libmpv resolves hosts itself and can follow redirects after the preflight; DNS changes, IPv6 choices, nested demuxer requests and redirection are not pinned/centrally intercepted. The mpv manual also documents limitations of `access-references=no`. Native links in this preview are explicitly user-initiated client requests. Do not expose the app as an unattended remote URL-processing backend. Phase 4 parses channel lists in the renderer with a 2 MiB limit, a 200-entry cap, no automatic playback, no remote logos, no nested lists, and no cookies or redirects on remote list fetches. Adaptive media explicitly enables references in the native helper; segment/key/redirect traffic remains engine-managed and is not a strict HTTPS-only or public-IP sandbox. Use trusted sources. Browser fetches remain subject to CORS and browser networking policy. No server proxy is implemented.
 
 Signed URLs remain visible to the device owner in memory/network inspection. Servers receive connection metadata. No attempt is made to hide this fact or bypass authentication, DRM or CORS.
 

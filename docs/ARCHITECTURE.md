@@ -1,4 +1,4 @@
-# ZenPlex architecture — current release 0.3.0
+# ZenPlex architecture — current release 0.4.0
 
 The browser and Windows native player implement a shared typed playback interface. The UI owns navigation and preferences; engine events own observed playback state.
 
@@ -12,4 +12,4 @@ The browser and Windows native player implement a shared typed playback interfac
 
 See [Phase 3 architecture](PHASE3_ARCHITECTURE.md) for rendering, lifecycle, security limits and official references, and [feature status](FEATURES.md) for verification boundaries.
 
-SQLite library indexing, HLS/DASH/M3U parsing, recovery automation, FFmpeg audio processing, AI adapters and React Native apps remain later phases. No placeholders pretend those features work.
+Streaming modules now provide M3U parsing, channel metadata, browser HLS/DASH and finite recovery. See STREAMING.md. SQLite library indexing, FFmpeg audio processing, AI adapters and React Native apps remain later phases. No placeholders pretend those features work.

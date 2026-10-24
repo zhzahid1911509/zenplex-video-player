@@ -1,6 +1,6 @@
-# ZenPlex 0.3.0 — Phase 3 native playback preview
+# ZenPlex 0.4.0 — Phase 4 streaming and playlists
 
-ZenPlex now includes a Windows x64 native helper, a libmpv playback adapter, native track/subtitle controls and the existing browser player.
+ZenPlex adds M3U channel imports, groups, search, session favorites, HLS/DASH playback, buffering information and bounded reconnects. The Phase 3 Windows player and startup fix are included.
 
 **Windows rendering/playback has not been verified in this Linux development environment.** The helper was cross-compiled, and the TypeScript/bridge/browser paths were tested. No libmpv DLL or Windows installer is bundled.
 
@@ -30,7 +30,16 @@ npm run dev
 
 Open http://127.0.0.1:5173. This uses the HTML media adapter and browser codec support, not libmpv. Existing themes, settings, queue, keyboard controls and local playback are preserved.
 
-## Native features added
+## Streaming and channels
+
+- **Play queue → Import channels:** choose an extended `.m3u` file or a CORS-enabled HTTPS playlist URL.
+- Use **Channel group**, **Search queue**, stars and **Favorites only** to find channels.
+- **Open URL:** open direct media, `.m3u8` HLS or `.mpd` DASH. Browser playback uses bundled, lazy-loaded hls.js/dash.js where needed; Windows native mode uses libmpv.
+- Lists are capped at 2 MiB and 200 queue entries. Imports do not autoplay.
+- Channels, favorite flags and signed URLs are session-only. Closing the app clears them.
+- Recovery waits at most 20 seconds for a stalled attempt and makes up to three reconnects; explicit pause/stop cancels it. See [STREAMING.md](docs/STREAMING.md).
+
+## Preserved native features
 
 - Embedded Win32 video surface owned by a separate helper process.
 - Local-file permissions represented by opaque tokens in the UI.
@@ -66,4 +75,4 @@ To prepare an unsigned installer after installing/auditing the runtime: `npm run
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
 - [Changed/source files](docs/FILES.md)
 
-**Next gate:** run the native integration test and manual Windows rendering/DPI/focus/fullscreen checks. Phase 4 streaming and playlist work follows that gate; it is not included in this release.
+**Next implementation:** Phase 5 AI Subtitle Studio. Windows/native streaming acceptance remains open; continuing development does not certify that platform. See docs/STREAMING.md for workflows, supported inputs, network constraints and test coverage.

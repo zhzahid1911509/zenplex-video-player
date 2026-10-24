@@ -1,4 +1,4 @@
-# Windows native playback — ZenPlex 0.3.0
+# Windows native playback — ZenPlex 0.4.0
 
 This release contains a cross-compiled Windows x64 helper and its complete source. **It has not been run on Windows in the development environment.** Treat it as a native integration preview until the acceptance checks below pass on your machine.
 
@@ -114,6 +114,6 @@ The build refuses to proceed if native runtime files are missing. It copies the 
 - **Missing mpv-2.dll:** install the extracted libmpv directory, not an mpv.exe-only package.
 - **Initialization failed:** check x64 architecture, companion DLLs, Windows runtime prerequisites and compatibility with the supported client API/options. Reopen media after correcting the runtime.
 - **Black/incorrectly positioned video:** record Windows version, display scaling, GPU/driver and the exact DLL build. Do not mark the native acceptance gate complete.
-- **Network source fails:** use a public HTTPS direct media URL on port 443. Website pages, authenticated service pages, playlists, local networks and DRM bypass are not supported.
+- **Network source fails:** use a public HTTPS direct media URL on port 443. HLS/DASH extension URLs are supported by compatible libmpv builds; import M3U lists through Play queue. Website pages, authenticated service pages, local networks and DRM bypass are not supported.
 - **Unsupported format:** record the container plus codecs. The file extension alone does not establish support.
 - **API/AI settings:** not part of this phase; there is no API key required for playback.

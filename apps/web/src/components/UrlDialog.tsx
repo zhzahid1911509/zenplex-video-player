@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { classifyUrl } from '../../../../packages/streaming/playlist';
 import { X, Link } from 'lucide-react';
 import { validateMediaUrl } from '../../../../packages/core/media';
 export function UrlDialog({
@@ -34,10 +35,8 @@ export function UrlDialog({
           e.preventDefault();
           try {
             const media = validateMediaUrl(value);
-            if (media.kind === 'manifest')
-              throw new Error(
-                'Playlist and adaptive-stream imports are scheduled for Phase 4. Use a direct media URL in this build.',
-              );
+            if (classifyUrl(media.url) === 'playlist')
+              throw new Error('Use Import channels in the Play queue to open an M3U channel list.');
             onOpen(media.url, media.title);
             onClose();
           } catch (err) {
@@ -54,10 +53,10 @@ export function UrlDialog({
             <X size={20} />
           </button>
         </div>
-        <h2 id="url-title">Open a direct URL</h2>
+        <h2 id="url-title">Open network media</h2>
         <p className="muted">
-          Use a public HTTPS video or audio file. Website pages and protected service links are not
-          direct media.
+          Use public HTTPS media, HLS (.m3u8), or DASH (.mpd). Website pages and protected service
+          links are not direct media.
         </p>
         <label>
           Media URL

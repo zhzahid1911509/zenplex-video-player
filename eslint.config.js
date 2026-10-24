@@ -4,6 +4,7 @@ import globals from 'globals';
 export default ts.config(
   {
     ignores: [
+      'tests/fixtures/**',
       'dist/**',
       'dist-desktop/**',
       'release/**',

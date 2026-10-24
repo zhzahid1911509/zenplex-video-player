@@ -6,6 +6,10 @@ export type MediaSource = {
   url: string;
   kind: 'file' | 'url';
   nativeToken?: string;
+  streamType?: 'direct' | 'hls' | 'dash';
+  group?: string;
+  channelId?: string;
+  favorite?: boolean;
 };
 export type PlaybackState = {
   status: PlaybackStatus;
@@ -80,8 +84,8 @@ export function validateMediaUrl(input: string): {
   } catch {
     throw new Error('Enter a complete HTTPS media URL.');
   }
-  if (url.protocol !== 'https:')
-    throw new Error('Only HTTPS URLs are supported in this foundation build.');
+  if (url.protocol !== 'https:') throw new Error('Only HTTPS media URLs are supported.');
+  if (url.port && url.port !== '443') throw new Error('HTTPS media must use port 443.');
   if (url.username || url.password)
     throw new Error('URLs containing credentials are not accepted.');
   const host = url.hostname.toLowerCase();

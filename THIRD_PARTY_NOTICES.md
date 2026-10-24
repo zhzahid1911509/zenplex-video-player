@@ -1,4 +1,4 @@
-# Third-party notice inventory — 0.3.0
+# Third-party notice inventory — 0.4.0
 
 ZenPlex UI and branding are original. This package does not include proprietary player code or a libmpv/FFmpeg runtime binary.
 
@@ -15,6 +15,8 @@ The ISC client header is distinct from the mpv core's licensing. The helper dyna
 - Zustand — MIT — https://github.com/pmndrs/zustand
 - Zod — MIT — https://github.com/colinhacks/zod
 - Lucide — ISC — https://github.com/lucide-icons/lucide
+- hls.js 1.7.3 — Apache-2.0 — https://github.com/video-dev/hls.js — full notice in docs/licenses/hls.js-LICENSE.txt
+- dash.js 5.2.1 — BSD-3-Clause — https://github.com/Dash-Industry-Forum/dash.js — full notice in docs/licenses/dashjs-LICENSE.md
 - Electron — MIT plus bundled component notices — https://github.com/electron/electron
 
 Exact versions are pinned in package-lock.json. Preserve installed dependency notices and Electron/Chromium component notices in distributions. This inventory is not a full transitive audit.
